@@ -5,39 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个性化导航页</title>
     <style>
-        /* 保留原有样式，新增以下样式 */
-        .network-type {
-            position: absolute;
-            bottom: 0.5rem;
-            left: 0.5rem;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.4rem;
-            background: #6366f1;
-            color: white;
-            border-radius: 3px;
-        }
-        .network-switch {
+        /* 保留所有原有样式，新增以下样式 */
+        .import-export {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 1rem;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+        .import-export button {
+            padding: 0.6rem 1.2rem;
+            background: #4f46e5;
             color: white;
-        }
-        .network-switch select {
-            padding: 0.4rem;
-            border-radius: 4px;
             border: none;
-        }
-        .form-container .network-option {
-            min-width: 150px;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
             border-radius: 4px;
+            cursor: pointer;
+        }
+        .import-export button:hover {
+            background: #4338ca;
+        }
+        #fileInput {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- 登录容器（不变） -->
     <div class="login-container" id="loginContainer">
         <div class="login-form">
             <h2>请输入访问密码</h2>
@@ -49,7 +40,6 @@
     <div class="container" id="mainContent" class="hidden">
         <h1>我的个性化导航页</h1>
 
-        <!-- 新增：网络类型切换器（仅管理员可见） -->
         <div class="network-switch" id="networkSwitch" style="display: none;">
             <span>网络类型：</span>
             <select id="networkTypeSelect" onchange="switchNetworkType()">
@@ -59,7 +49,13 @@
             </select>
         </div>
 
-        <!-- 顶部控制区（不变） -->
+        <!-- 新增：导入导出按钮 -->
+        <div class="import-export" id="importExportContainer" style="display: none;">
+            <button onclick="document.getElementById('fileInput').click()">导入JSON书签</button>
+            <button onclick="exportBookmarks()">导出JSON书签</button>
+            <input type="file" id="fileInput" accept=".json" onchange="importBookmarks(event)">
+        </div>
+
         <div class="top-controls">
             <div class="bg-config">
                 <input type="url" id="bgImageUrl" placeholder="输入背景图片API链接（如Unsplash）">
@@ -72,21 +68,23 @@
             </div>
         </div>
 
-        <!-- 分类标签（不变） -->
         <div class="category-tabs" id="categoryTabs">
             <button class="category-tab active" data-category="all">全部</button>
         </div>
 
-        <!-- 链接网格（不变） -->
         <div class="link-grid" id="linkContainer"></div>
 
-        <!-- 添加链接表单（新增内网/外网URL设置） -->
         <div class="form-container">
             <h3>添加新链接</h3>
             <form id="addLinkForm">
                 <input type="text" name="name" placeholder="链接名称" required>
-                <input type="url" name="externalUrl" placeholder="外网链接（如https://example.com）" required>
-                <input type="text" name="internalUrl" placeholder="内网链接（如http://192.168.1.100）" required>
+                <div>
+                    <input type="url" name="externalUrl" placeholder="外网链接（必填，如https://example.com）" required>
+                </div>
+                <div>
+                    <input type="text" name="internalUrl" placeholder="内网链接（可选，如http://192.168.1.100）">
+                    <div class="optional-hint">内网链接为可选</div>
+                </div>
                 <select name="category" required>
                     <option value="工作">工作</option>
                     <option value="学习">学习</option>
@@ -106,18 +104,18 @@
     <script>
         let allLinks = [];
         let currentCategory = 'all';
-        let currentNetworkType = 'auto'; // 默认为自动检测
+        let currentNetworkType = 'auto';
         const AUTH_TOKEN = 'valid_token';
         let isAdmin = false;
 
-        // 页面加载时初始化
         window.onload = () => {
             const auth = localStorage.getItem('auth');
             if (auth === AUTH_TOKEN) {
                 isAdmin = true;
                 document.getElementById('loginContainer').classList.add('hidden');
                 document.getElementById('mainContent').classList.remove('hidden');
-                document.getElementById('networkSwitch').style.display = 'flex'; // 显示网络切换器
+                document.getElementById('networkSwitch').style.display = 'flex';
+                document.getElementById('importExportContainer').style.display = 'flex'; // 显示导入导出按钮
                 loadSavedBackground();
                 loadLinks();
             } else {
@@ -129,28 +127,95 @@
             }
         };
 
-        // 自动检测网络类型（简单判断：内网IP段）
+        // 新增：导出书签为JSON文件
+        function exportBookmarks() {
+            if (!isAdmin) return;
+            // 准备导出数据（添加导出时间）
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                links: allLinks
+            };
+            const jsonString = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bookmarks_${new Date().getTime()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 新增：导入JSON书签文件
+        async function importBookmarks(event) {
+            if (!isAdmin) return;
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    // 验证导入格式
+                    if (!importData.links || !Array.isArray(importData.links)) {
+                        throw new Error('JSON格式错误，缺少links数组');
+                    }
+
+                    // 批量添加书签（重复ID会被覆盖）
+                    for (const link of importData.links) {
+                        // 验证必要字段
+                        if (!link.name || !link.externalUrl || !link.category || !link.visibility) {
+                            console.warn(`跳过无效链接: ${link.name || '未知名称'}`);
+                            continue;
+                        }
+                        // 生成新ID避免冲突（或保留原ID）
+                        const linkWithId = {
+                            ...link,
+                            id: link.id || Date.now() + Math.random().toString(36).substr(2, 5)
+                        };
+                        await fetch('/api/links', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('auth')}`
+                            },
+                            body: JSON.stringify(linkWithId)
+                        });
+                    }
+
+                    alert(`导入成功，共处理 ${importData.links.length} 个链接`);
+                    loadLinks(); // 重新加载链接
+                    event.target.value = ''; // 重置文件输入
+                } catch (err) {
+                    alert(`导入失败: ${err.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 其余原有函数保持不变
         function detectNetworkType() {
-            // 实际应用中可通过检测内网IP或特定域名可达性实现
-            const internalIps = ['192.168.', '10.', '172.16.'];
             return new Promise(resolve => {
-                // 模拟检测（实际项目可替换为真实IP检测）
                 setTimeout(() => {
-                    resolve('external'); // 默认返回外网，可根据需求修改
+                    resolve('external');
                 }, 500);
             });
         }
 
-        // 切换网络类型
-        async function switchNetworkType() {
+        function switchNetworkType() {
             currentNetworkType = document.getElementById('networkTypeSelect').value;
             if (currentNetworkType === 'auto') {
-                currentNetworkType = await detectNetworkType();
+                detectNetworkType().then(type => {
+                    currentNetworkType = type;
+                    renderLinks(allLinks);
+                });
+            } else {
+                renderLinks(allLinks);
             }
-            renderLinks(allLinks);
         }
 
-        // 密码验证（管理员登录）
         async function verifyPassword() {
             const inputPwd = document.getElementById('loginPassword').value;
             try {
@@ -164,6 +229,7 @@
                     isAdmin = true;
                     document.getElementById('loginContainer').classList.add('hidden');
                     document.getElementById('networkSwitch').style.display = 'flex';
+                    document.getElementById('importExportContainer').style.display = 'flex';
                     loadLinks();
                 } else {
                     alert('密码错误，仅管理员可查看私有链接');
@@ -173,7 +239,6 @@
             }
         }
 
-        // 未登录用户加载公开链接（仅外网）
         async function loadPublicLinks() {
             const res = await fetch('/api/links/public');
             allLinks = await res.json();
@@ -181,7 +246,6 @@
             renderCategories();
         }
 
-        // 管理员加载所有链接
         async function loadLinks() {
             const auth = localStorage.getItem('auth');
             if (!auth) return;
@@ -193,11 +257,11 @@
                 localStorage.removeItem('auth');
                 isAdmin = false;
                 document.getElementById('networkSwitch').style.display = 'none';
+                document.getElementById('importExportContainer').style.display = 'none';
                 loadPublicLinks();
                 return;
             }
             allLinks = await res.json();
-            // 自动检测网络类型
             if (currentNetworkType === 'auto') {
                 currentNetworkType = await detectNetworkType();
                 document.getElementById('networkTypeSelect').value = 'auto';
@@ -206,7 +270,6 @@
             renderCategories();
         }
 
-        // 渲染链接（根据网络类型选择URL）
         function renderLinks(links) {
             const container = document.getElementById('linkContainer');
             container.innerHTML = '';
@@ -215,13 +278,16 @@
                 return;
             }
 
-            // 确定当前使用的网络类型
             const activeNetworkType = currentNetworkType === 'auto' ? 'external' : currentNetworkType;
 
             links.forEach(link => {
-                // 选择显示的URL
-                const displayUrl = activeNetworkType === 'internal' ? link.internalUrl : link.externalUrl;
-                const networkLabel = activeNetworkType === 'internal' ? '内网' : '外网';
+                let displayUrl = link.externalUrl;
+                let networkLabel = '外网';
+                
+                if (activeNetworkType === 'internal' && link.internalUrl) {
+                    displayUrl = link.internalUrl;
+                    networkLabel = '内网';
+                }
 
                 const card = document.createElement('div');
                 card.className = 'link-card';
@@ -237,7 +303,6 @@
                 container.appendChild(card);
             });
 
-            // 管理员删除事件
             if (isAdmin) {
                 document.querySelectorAll('.delete-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
@@ -252,7 +317,6 @@
             }
         }
 
-        // 添加链接（包含内网/外网URL）
         document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!isAdmin) {
@@ -263,8 +327,8 @@
             const link = {
                 id: Date.now().toString(),
                 name: formData.get('name'),
-                externalUrl: formData.get('externalUrl'), // 外网URL
-                internalUrl: formData.get('internalUrl'), // 内网URL
+                externalUrl: formData.get('externalUrl'),
+                internalUrl: formData.get('internalUrl') || '',
                 category: formData.get('category'),
                 visibility: formData.get('visibility')
             };
@@ -280,7 +344,6 @@
             loadLinks();
         });
 
-        // 其余函数（背景设置、搜索、分类等）保持不变
         function setBackground() {
             const url = document.getElementById('bgImageUrl').value;
             if (url) {
@@ -335,7 +398,7 @@
                 filteredLinks = filteredLinks.filter(link => 
                     link.name.toLowerCase().includes(keyword) || 
                     link.externalUrl.toLowerCase().includes(keyword) ||
-                    link.internalUrl.toLowerCase().includes(keyword) ||
+                    (link.internalUrl && link.internalUrl.toLowerCase().includes(keyword)) ||
                     link.category.toLowerCase().includes(keyword)
                 );
             }
