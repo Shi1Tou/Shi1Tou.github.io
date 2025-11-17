@@ -6,6 +6,17 @@
 点击 创建项目 → 连接到 Git，选择你的 GitHub 仓库。
 选择要部署的分支（如 main）。
 
+部署说明（关键步骤）
+
+配置环境变量：在 Cloudflare Pages 控制台 → 你的项目 → 设置 → 环境变量 → 添加：
+变量名：ACCESS_PASSWORD
+变量值：你的自定义密码（如 mypassword123）
+KV 命名空间：确保已创建 NAV_LINKS 命名空间，并在项目设置中绑定（参考之前的步骤）。
+部署方式：
+本地部署：wrangler pages deploy
+GitHub 集成：推送代码后自动部署（需在控制台配置环境变量和 KV 绑定）
+
+
 配置构建设置
 
 框架预设：选择 None（因为是自定义项目）。
