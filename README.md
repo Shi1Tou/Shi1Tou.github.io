@@ -1,4 +1,3 @@
-# Shi1Tou.github.io
 
 部署方式：cloudfare pages
 
@@ -29,3 +28,4 @@
 KV 命名空间：选择之前创建的 NAV_LINKS 命名空间。
 
 开始部署点击 部署项目，Cloudflare 会自动从 GitHub 拉取代码并部署。后续每次向 GitHub 推送代码，都会触发自动部署。
+
