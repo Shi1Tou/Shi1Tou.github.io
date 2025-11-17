@@ -1,21 +1,34 @@
-// 替换为你的访问密码（需与前端一致）
-const ACCESS_PASSWORD = '123456';
-
+// 从Cloudflare环境变量读取密码（无需硬编码）
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const ACCESS_PASSWORD = env.ACCESS_PASSWORD; // 关键：读取环境变量
+    const AUTH_TOKEN = 'valid_token'; // 与前端同步的验证标识
 
-    // API接口权限验证
+    // 1. 密码验证接口（供前端登录）
+    if (url.pathname === '/api/verify-password' && request.method === 'POST') {
+      if (!ACCESS_PASSWORD) {
+        return new Response('未配置密码', { status: 500 });
+      }
+      const { password } = await request.json();
+      if (password === ACCESS_PASSWORD) {
+        return new Response('验证通过', { status: 200 });
+      } else {
+        return new Response('密码错误', { status: 401 });
+      }
+    }
+
+    // 2. API接口权限验证（除了登录接口）
     const isApiRequest = url.pathname.startsWith('/api');
-    if (isApiRequest) {
+    if (isApiRequest && url.pathname !== '/api/verify-password') {
       const authHeader = request.headers.get('Authorization');
-      // 验证格式：Bearer 密码
-      if (!authHeader || authHeader !== `Bearer ${ACCESS_PASSWORD}`) {
+      // 验证格式：Bearer 标识
+      if (!authHeader || authHeader !== `Bearer ${AUTH_TOKEN}`) {
         return new Response('未授权', { status: 401 });
       }
     }
 
-    // 静态文件：返回index.html
+    // 3. 静态文件：返回index.html
     if (url.pathname === '/') {
       const html = await env.ASSETS.get('index.html');
       return new Response(html, {
@@ -23,7 +36,7 @@ export default {
       });
     }
 
-    // API：获取所有链接
+    // 4. API：获取所有链接
     if (url.pathname === '/api/links' && request.method === 'GET') {
       const links = [];
       const iterator = env.NAV_LINKS.list();
@@ -36,11 +49,10 @@ export default {
       });
     }
 
-    // API：添加链接
+    // 5. API：添加链接
     if (url.pathname === '/api/links' && request.method === 'POST') {
       try {
         const link = await request.json();
-        // 验证必要字段
         if (!link.id || !link.name || !link.url || !link.category) {
           return new Response('缺少必要字段', { status: 400 });
         }
@@ -51,14 +63,14 @@ export default {
       }
     }
 
-    // API：删除链接
+    // 6. API：删除链接
     if (url.pathname.match(/^\/api\/links\/(\w+)$/) && request.method === 'DELETE') {
       const id = url.pathname.split('/')[3];
       await env.NAV_LINKS.delete(id);
       return new Response('删除成功');
     }
 
-    // 404页面
+    // 7. 404页面
     return new Response('页面不存在', { status: 404 });
   }
 };
