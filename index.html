@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性化导航页</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            padding: 2rem; 
+            min-height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: -1;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            position: relative;
+        }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 1.5rem; 
+            color: white; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .login-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 350px;
+            text-align: center;
+        }
+        .login-form input {
+            width: 100%;
+            margin: 1rem 0;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .top-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .bg-config, .search-box {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(255,255,255,0.9);
+            padding: 0.8rem;
+            border-radius: 8px;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .bg-config input, .search-box input {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 0.6rem;
+            border-radius: 4px;
+            outline: none;
+        }
+        .bg-config button, .search-box button {
+            padding: 0.6rem 1rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .category-tabs {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .category-tab {
+            padding: 0.6rem 1.2rem;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .category-tab.active {
+            background: #2563eb;
+            color: white;
+        }
+        .link-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 1rem; 
+            margin-bottom: 2rem; 
+        }
+        .link-card { 
+            background: rgba(255,255,255,0.9); 
+            padding: 1rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+            text-align: center; 
+            position: relative;
+        }
+        .link-card .category-tag {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            background: #94a3b8;
+            color: white;
+            border-radius: 3px;
+        }
+        .link-card a { 
+            text-decoration: none; 
+            color: #2563eb; 
+            font-weight: 500; 
+            display: block;
+            margin: 0.5rem 0;
+        }
+        .link-card a:hover { 
+            color: #1d4ed8; 
+        }
+        .delete-btn { 
+            background: #ef4444; 
+            margin-top: 0.5rem; 
+            padding: 0.4rem 0.8rem; 
+            font-size: 0.8rem; 
+            border: none; 
+            border-radius: 4px; 
+            color: white; 
+            cursor: pointer; 
+        }
+        .form-container { 
+            background: rgba(255,255,255,0.9); 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+        }
+        .form-container h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        form { 
+            display: flex; 
+            gap: 1rem; 
+            flex-wrap: wrap; 
+        }
+        form input, form select { 
+            flex: 1; 
+            min-width: 180px; 
+            padding: 0.8rem; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            outline: none;
+        }
+        form button { 
+            padding: 0.8rem 1.5rem; 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            white-space: nowrap;
+        }
+        form button:hover { 
+            background: #1d4ed8; 
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <div class="login-form">
+            <h2>请输入访问密码</h2>
+            <input type="password" id="loginPassword" placeholder="密码" required>
+            <button onclick="verifyPassword()">登录</button>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent" class="hidden">
+        <h1>我的个性化导航页</h1>
+
+        <div class="top-controls">
+            <div class="bg-config">
+                <input type="url" id="bgImageUrl" placeholder="输入背景图片API链接（如Unsplash）">
+                <button onclick="setBackground()">设置背景</button>
+                <button onclick="resetBackground()">重置</button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索链接...">
+                <button onclick="searchLinks()">搜索</button>
+            </div>
+        </div>
+
+        <div class="category-tabs" id="categoryTabs">
+            <button class="category-tab active" data-category="all">全部</button>
+        </div>
+
+        <div class="link-grid" id="linkContainer"></div>
+
+        <div class="form-container">
+            <h3>添加新链接</h3>
+            <form id="addLinkForm">
+                <input type="text" name="name" placeholder="链接名称" required>
+                <input type="url" name="url" placeholder="链接地址" required>
+                <select name="category" required>
+                    <option value="工作">工作</option>
+                    <option value="学习">学习</option>
+                    <option value="娱乐">娱乐</option>
+                    <option value="工具">工具</option>
+                    <option value="其他">其他</option>
+                </select>
+                <button type="submit">添加</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const ACCESS_PASSWORD = '123456'; // 替换为你的密码
+        let allLinks = [];
+        let currentCategory = 'all';
+
+        function verifyPassword() {
+            const inputPwd = document.getElementById('loginPassword').value;
+            if (inputPwd === ACCESS_PASSWORD) {
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                loadSavedBackground();
+                loadLinks();
+            } else {
+                alert('密码错误，请重试！');
+            }
+        }
+
+        function setBackground() {
+            const url = document.getElementById('bgImageUrl').value;
+            if (url) {
+                document.body.style.backgroundImage = `url(${url})`;
+                localStorage.setItem('bgImageUrl', url);
+            } else {
+                alert('请输入有效的图片链接！');
+            }
+        }
+
+        function resetBackground() {
+            document.body.style.backgroundImage = '';
+            localStorage.removeItem('bgImageUrl');
+            document.getElementById('bgImageUrl').value = '';
+        }
+
+        function loadSavedBackground() {
+            const savedUrl = localStorage.getItem('bgImageUrl');
+            if (savedUrl) {
+                document.body.style.backgroundImage = `url(${savedUrl})`;
+                document.getElementById('bgImageUrl').value = savedUrl;
+            }
+        }
+
+        async function loadLinks() {
+            const res = await fetch('/api/links', {
+                headers: { 'Authorization': `Bearer ${ACCESS_PASSWORD}` }
+            });
+            allLinks = await res.json();
+            renderLinks(allLinks);
+            renderCategories();
+        }
+
+        function renderCategories() {
+            const categories = ['工作', '学习', '娱乐', '工具', '其他'];
+            const tabContainer = document.getElementById('categoryTabs');
+            tabContainer.innerHTML = '<button class="category-tab active" data-category="all">全部</button>';
+            categories.forEach(cat => {
+                const tab = document.createElement('button');
+                tab.className = 'category-tab';
+                tab.dataset.category = cat;
+                tab.textContent = cat;
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = cat;
+                    const filteredLinks = allLinks.filter(link => link.category === cat);
+                    renderLinks(filteredLinks);
+                });
+                tabContainer.appendChild(tab);
+            });
+        }
+
+        function renderLinks(links) {
+            const container = document.getElementById('linkContainer');
+            container.innerHTML = '';
+            if (links.length === 0) {
+                container.innerHTML = '<div style="color:white; grid-column: 1/-1; text-align: center;">暂无链接</div>';
+                return;
+            }
+            links.forEach(link => {
+                const card = document.createElement('div');
+                card.className = 'link-card';
+                card.innerHTML = `
+                    <span class="category-tag">${link.category}</span>
+                    <a href="${link.url}" target="_blank">${link.name}</a>
+                    <button class="delete-btn" data-id="${link.id}">删除</button>
+                `;
+                container.appendChild(card);
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.dataset.id;
+                    await fetch(`/api/links/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${ACCESS_PASSWORD}` }
+                    });
+                    loadLinks();
+                });
+            });
+        }
+
+        function searchLinks() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            let filteredLinks = allLinks;
+            if (currentCategory !== 'all') {
+                filteredLinks = filteredLinks.filter(link => link.category === currentCategory);
+            }
+            if (keyword) {
+                filteredLinks = filteredLinks.filter(link => 
+                    link.name.toLowerCase().includes(keyword) || 
+                    link.url.toLowerCase().includes(keyword) ||
+                    link.category.toLowerCase().includes(keyword)
+                );
+            }
+            renderLinks(filteredLinks);
+        }
+
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const link = {
+                id: Date.now().toString(),
+                name: formData.get('name'),
+                url: formData.get('url'),
+                category: formData.get('category')
+            };
+            await fetch('/api/links', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ACCESS_PASSWORD}`
+                },
+                body: JSON.stringify(link)
+            });
+            e.target.reset();
+            loadLinks();
+        });
+
+        document.querySelector('.category-tab[data-category="all"]').addEventListener('click', () => {
+            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.category-tab[data-category="all"]').classList.add('active');
+            currentCategory = 'all';
+            renderLinks(allLinks);
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchLinks();
+        });
+    </script>
+</body>
+</html>
