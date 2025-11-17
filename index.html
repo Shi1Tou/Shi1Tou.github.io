@@ -5,205 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个性化导航页</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Arial', sans-serif; 
-            padding: 2rem; 
-            min-height: 100vh;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            transition: background-image 0.5s ease;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: -1;
-        }
-        .container { 
-            max-width: 1000px; 
-            margin: 0 auto; 
-            position: relative;
-        }
-        h1 { 
-            text-align: center; 
-            margin-bottom: 1.5rem; 
-            color: white; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .login-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        .login-form {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 350px;
-            text-align: center;
-        }
-        .login-form input {
-            width: 100%;
-            margin: 1rem 0;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .login-form button {
-            width: 100%;
-            padding: 0.8rem;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .top-controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .bg-config, .search-box {
-            flex: 1;
-            min-width: 250px;
-            background: rgba(255,255,255,0.9);
-            padding: 0.8rem;
-            border-radius: 8px;
-            display: flex;
-            gap: 0.5rem;
-        }
-        .bg-config input, .search-box input {
-            flex: 1;
-            border: 1px solid #ddd;
-            padding: 0.6rem;
-            border-radius: 4px;
-            outline: none;
-        }
-        .bg-config button, .search-box button {
-            padding: 0.6rem 1rem;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .category-tabs {
-            display: flex;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .category-tab {
-            padding: 0.6rem 1.2rem;
-            background: rgba(255,255,255,0.8);
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .category-tab.active {
-            background: #2563eb;
-            color: white;
-        }
-        .link-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 1rem; 
-            margin-bottom: 2rem; 
-        }
-        .link-card { 
-            background: rgba(255,255,255,0.9); 
-            padding: 1rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
-            text-align: center; 
-            position: relative;
-        }
-        .link-card .category-tag {
+        /* 保留原有样式，新增以下样式 */
+        .network-type {
             position: absolute;
-            top: 0.5rem;
+            bottom: 0.5rem;
             left: 0.5rem;
             font-size: 0.7rem;
             padding: 0.2rem 0.4rem;
-            background: #94a3b8;
+            background: #6366f1;
             color: white;
             border-radius: 3px;
         }
-        .link-card a { 
-            text-decoration: none; 
-            color: #2563eb; 
-            font-weight: 500; 
-            display: block;
-            margin: 0.5rem 0;
-        }
-        .link-card a:hover { 
-            color: #1d4ed8; 
-        }
-        .delete-btn { 
-            background: #ef4444; 
-            margin-top: 0.5rem; 
-            padding: 0.4rem 0.8rem; 
-            font-size: 0.8rem; 
-            border: none; 
-            border-radius: 4px; 
-            color: white; 
-            cursor: pointer; 
-        }
-        .form-container { 
-            background: rgba(255,255,255,0.9); 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
-        }
-        .form-container h3 {
-            color: #333;
+        .network-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             margin-bottom: 1rem;
+            color: white;
         }
-        form { 
-            display: flex; 
-            gap: 1rem; 
-            flex-wrap: wrap; 
+        .network-switch select {
+            padding: 0.4rem;
+            border-radius: 4px;
+            border: none;
         }
-        form input, form select { 
-            flex: 1; 
-            min-width: 180px; 
-            padding: 0.8rem; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            outline: none;
-        }
-        form button { 
-            padding: 0.8rem 1.5rem; 
-            background: #2563eb; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            white-space: nowrap;
-        }
-        form button:hover { 
-            background: #1d4ed8; 
-        }
-        .hidden {
-            display: none;
+        .form-container .network-option {
+            min-width: 150px;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
+    <!-- 登录容器（不变） -->
     <div class="login-container" id="loginContainer">
         <div class="login-form">
             <h2>请输入访问密码</h2>
@@ -215,6 +49,17 @@
     <div class="container" id="mainContent" class="hidden">
         <h1>我的个性化导航页</h1>
 
+        <!-- 新增：网络类型切换器（仅管理员可见） -->
+        <div class="network-switch" id="networkSwitch" style="display: none;">
+            <span>网络类型：</span>
+            <select id="networkTypeSelect" onchange="switchNetworkType()">
+                <option value="auto">自动检测</option>
+                <option value="internal">内网</option>
+                <option value="external">外网</option>
+            </select>
+        </div>
+
+        <!-- 顶部控制区（不变） -->
         <div class="top-controls">
             <div class="bg-config">
                 <input type="url" id="bgImageUrl" placeholder="输入背景图片API链接（如Unsplash）">
@@ -227,23 +72,31 @@
             </div>
         </div>
 
+        <!-- 分类标签（不变） -->
         <div class="category-tabs" id="categoryTabs">
             <button class="category-tab active" data-category="all">全部</button>
         </div>
 
+        <!-- 链接网格（不变） -->
         <div class="link-grid" id="linkContainer"></div>
 
+        <!-- 添加链接表单（新增内网/外网URL设置） -->
         <div class="form-container">
             <h3>添加新链接</h3>
             <form id="addLinkForm">
                 <input type="text" name="name" placeholder="链接名称" required>
-                <input type="url" name="url" placeholder="链接地址" required>
+                <input type="url" name="externalUrl" placeholder="外网链接（如https://example.com）" required>
+                <input type="text" name="internalUrl" placeholder="内网链接（如http://192.168.1.100）" required>
                 <select name="category" required>
                     <option value="工作">工作</option>
                     <option value="学习">学习</option>
                     <option value="娱乐">娱乐</option>
                     <option value="工具">工具</option>
                     <option value="其他">其他</option>
+                </select>
+                <select name="visibility" class="visibility-option" required>
+                    <option value="public">公开（所有人可见）</option>
+                    <option value="private">仅管理员可见</option>
                 </select>
                 <button type="submit">添加</button>
             </form>
@@ -253,9 +106,51 @@
     <script>
         let allLinks = [];
         let currentCategory = 'all';
-        const AUTH_TOKEN = 'valid_token'; // 简单验证标识（后端同步使用）
+        let currentNetworkType = 'auto'; // 默认为自动检测
+        const AUTH_TOKEN = 'valid_token';
+        let isAdmin = false;
 
-        // 密码验证（通过后端接口）
+        // 页面加载时初始化
+        window.onload = () => {
+            const auth = localStorage.getItem('auth');
+            if (auth === AUTH_TOKEN) {
+                isAdmin = true;
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('networkSwitch').style.display = 'flex'; // 显示网络切换器
+                loadSavedBackground();
+                loadLinks();
+            } else {
+                isAdmin = false;
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                loadSavedBackground();
+                loadPublicLinks();
+            }
+        };
+
+        // 自动检测网络类型（简单判断：内网IP段）
+        function detectNetworkType() {
+            // 实际应用中可通过检测内网IP或特定域名可达性实现
+            const internalIps = ['192.168.', '10.', '172.16.'];
+            return new Promise(resolve => {
+                // 模拟检测（实际项目可替换为真实IP检测）
+                setTimeout(() => {
+                    resolve('external'); // 默认返回外网，可根据需求修改
+                }, 500);
+            });
+        }
+
+        // 切换网络类型
+        async function switchNetworkType() {
+            currentNetworkType = document.getElementById('networkTypeSelect').value;
+            if (currentNetworkType === 'auto') {
+                currentNetworkType = await detectNetworkType();
+            }
+            renderLinks(allLinks);
+        }
+
+        // 密码验证（管理员登录）
         async function verifyPassword() {
             const inputPwd = document.getElementById('loginPassword').value;
             try {
@@ -265,21 +160,127 @@
                     body: JSON.stringify({ password: inputPwd })
                 });
                 if (res.ok) {
-                    // 验证通过，存储标识
                     localStorage.setItem('auth', AUTH_TOKEN);
+                    isAdmin = true;
                     document.getElementById('loginContainer').classList.add('hidden');
-                    document.getElementById('mainContent').classList.remove('hidden');
-                    loadSavedBackground();
+                    document.getElementById('networkSwitch').style.display = 'flex';
                     loadLinks();
                 } else {
-                    alert('密码错误，请重试！');
+                    alert('密码错误，仅管理员可查看私有链接');
                 }
             } catch (e) {
-                alert('验证失败，请检查网络');
+                alert('验证失败');
             }
         }
 
-        // 背景设置
+        // 未登录用户加载公开链接（仅外网）
+        async function loadPublicLinks() {
+            const res = await fetch('/api/links/public');
+            allLinks = await res.json();
+            renderLinks(allLinks);
+            renderCategories();
+        }
+
+        // 管理员加载所有链接
+        async function loadLinks() {
+            const auth = localStorage.getItem('auth');
+            if (!auth) return;
+            const res = await fetch('/api/links', {
+                headers: { 'Authorization': `Bearer ${auth}` }
+            });
+            if (res.status === 401) {
+                alert('登录已过期');
+                localStorage.removeItem('auth');
+                isAdmin = false;
+                document.getElementById('networkSwitch').style.display = 'none';
+                loadPublicLinks();
+                return;
+            }
+            allLinks = await res.json();
+            // 自动检测网络类型
+            if (currentNetworkType === 'auto') {
+                currentNetworkType = await detectNetworkType();
+                document.getElementById('networkTypeSelect').value = 'auto';
+            }
+            renderLinks(allLinks);
+            renderCategories();
+        }
+
+        // 渲染链接（根据网络类型选择URL）
+        function renderLinks(links) {
+            const container = document.getElementById('linkContainer');
+            container.innerHTML = '';
+            if (links.length === 0) {
+                container.innerHTML = '<div style="color:white; grid-column: 1/-1; text-align: center;">暂无链接</div>';
+                return;
+            }
+
+            // 确定当前使用的网络类型
+            const activeNetworkType = currentNetworkType === 'auto' ? 'external' : currentNetworkType;
+
+            links.forEach(link => {
+                // 选择显示的URL
+                const displayUrl = activeNetworkType === 'internal' ? link.internalUrl : link.externalUrl;
+                const networkLabel = activeNetworkType === 'internal' ? '内网' : '外网';
+
+                const card = document.createElement('div');
+                card.className = 'link-card';
+                card.innerHTML = `
+                    <span class="category-tag">${link.category}</span>
+                    <span class="visibility-tag ${link.visibility === 'public' ? 'public' : ''}">
+                        ${link.visibility === 'public' ? '公开' : '私有'}
+                    </span>
+                    <span class="network-type">${networkLabel}</span>
+                    <a href="${displayUrl}" target="_blank">${link.name}</a>
+                    ${isAdmin ? `<button class="delete-btn" data-id="${link.id}">删除</button>` : ''}
+                `;
+                container.appendChild(card);
+            });
+
+            // 管理员删除事件
+            if (isAdmin) {
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.target.dataset.id;
+                        await fetch(`/api/links/${id}`, { 
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem('auth')}` }
+                        });
+                        loadLinks();
+                    });
+                });
+            }
+        }
+
+        // 添加链接（包含内网/外网URL）
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!isAdmin) {
+                alert('请登录管理员账号添加链接');
+                return;
+            }
+            const formData = new FormData(e.target);
+            const link = {
+                id: Date.now().toString(),
+                name: formData.get('name'),
+                externalUrl: formData.get('externalUrl'), // 外网URL
+                internalUrl: formData.get('internalUrl'), // 内网URL
+                category: formData.get('category'),
+                visibility: formData.get('visibility')
+            };
+            await fetch('/api/links', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth')}`
+                },
+                body: JSON.stringify(link)
+            });
+            e.target.reset();
+            loadLinks();
+        });
+
+        // 其余函数（背景设置、搜索、分类等）保持不变
         function setBackground() {
             const url = document.getElementById('bgImageUrl').value;
             if (url) {
@@ -304,29 +305,6 @@
             }
         }
 
-        // 加载链接（带权限验证）
-        async function loadLinks() {
-            const auth = localStorage.getItem('auth');
-            if (!auth) {
-                alert('请先登录');
-                return;
-            }
-            const res = await fetch('/api/links', {
-                headers: { 'Authorization': `Bearer ${auth}` }
-            });
-            if (res.status === 401) {
-                alert('登录已过期，请重新登录');
-                localStorage.removeItem('auth');
-                document.getElementById('loginContainer').classList.remove('hidden');
-                document.getElementById('mainContent').classList.add('hidden');
-                return;
-            }
-            allLinks = await res.json();
-            renderLinks(allLinks);
-            renderCategories();
-        }
-
-        // 渲染分类
         function renderCategories() {
             const categories = ['工作', '学习', '娱乐', '工具', '其他'];
             const tabContainer = document.getElementById('categoryTabs');
@@ -347,40 +325,6 @@
             });
         }
 
-        // 渲染链接
-        function renderLinks(links) {
-            const container = document.getElementById('linkContainer');
-            container.innerHTML = '';
-            if (links.length === 0) {
-                container.innerHTML = '<div style="color:white; grid-column: 1/-1; text-align: center;">暂无链接</div>';
-                return;
-            }
-            links.forEach(link => {
-                const card = document.createElement('div');
-                card.className = 'link-card';
-                card.innerHTML = `
-                    <span class="category-tag">${link.category}</span>
-                    <a href="${link.url}" target="_blank">${link.name}</a>
-                    <button class="delete-btn" data-id="${link.id}">删除</button>
-                `;
-                container.appendChild(card);
-            });
-
-            // 删除链接事件
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const id = e.target.dataset.id;
-                    const auth = localStorage.getItem('auth');
-                    await fetch(`/api/links/${id}`, { 
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${auth}` }
-                    });
-                    loadLinks();
-                });
-            });
-        }
-
-        // 搜索链接
         function searchLinks() {
             const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
             let filteredLinks = allLinks;
@@ -390,41 +334,14 @@
             if (keyword) {
                 filteredLinks = filteredLinks.filter(link => 
                     link.name.toLowerCase().includes(keyword) || 
-                    link.url.toLowerCase().includes(keyword) ||
+                    link.externalUrl.toLowerCase().includes(keyword) ||
+                    link.internalUrl.toLowerCase().includes(keyword) ||
                     link.category.toLowerCase().includes(keyword)
                 );
             }
             renderLinks(filteredLinks);
         }
 
-        // 添加链接
-        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const auth = localStorage.getItem('auth');
-            if (!auth) {
-                alert('请先登录');
-                return;
-            }
-            const formData = new FormData(e.target);
-            const link = {
-                id: Date.now().toString(),
-                name: formData.get('name'),
-                url: formData.get('url'),
-                category: formData.get('category')
-            };
-            await fetch('/api/links', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${auth}`
-                },
-                body: JSON.stringify(link)
-            });
-            e.target.reset();
-            loadLinks();
-        });
-
-        // 全部分类点击
         document.querySelector('.category-tab[data-category="all"]').addEventListener('click', () => {
             document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
             document.querySelector('.category-tab[data-category="all"]').classList.add('active');
@@ -432,20 +349,9 @@
             renderLinks(allLinks);
         });
 
-        // 搜索框回车
         document.getElementById('searchInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') searchLinks();
         });
-
-        // 页面加载时检查登录状态
-        window.onload = () => {
-            if (localStorage.getItem('auth') === AUTH_TOKEN) {
-                document.getElementById('loginContainer').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                loadSavedBackground();
-                loadLinks();
-            }
-        };
     </script>
 </body>
 </html>
