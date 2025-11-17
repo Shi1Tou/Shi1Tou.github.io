@@ -251,22 +251,35 @@
     </div>
 
     <script>
-        const ACCESS_PASSWORD = '123456'; // 替换为你的密码
         let allLinks = [];
         let currentCategory = 'all';
+        const AUTH_TOKEN = 'valid_token'; // 简单验证标识（后端同步使用）
 
-        function verifyPassword() {
+        // 密码验证（通过后端接口）
+        async function verifyPassword() {
             const inputPwd = document.getElementById('loginPassword').value;
-            if (inputPwd === ACCESS_PASSWORD) {
-                document.getElementById('loginContainer').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                loadSavedBackground();
-                loadLinks();
-            } else {
-                alert('密码错误，请重试！');
+            try {
+                const res = await fetch('/api/verify-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: inputPwd })
+                });
+                if (res.ok) {
+                    // 验证通过，存储标识
+                    localStorage.setItem('auth', AUTH_TOKEN);
+                    document.getElementById('loginContainer').classList.add('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    loadSavedBackground();
+                    loadLinks();
+                } else {
+                    alert('密码错误，请重试！');
+                }
+            } catch (e) {
+                alert('验证失败，请检查网络');
             }
         }
 
+        // 背景设置
         function setBackground() {
             const url = document.getElementById('bgImageUrl').value;
             if (url) {
@@ -291,15 +304,29 @@
             }
         }
 
+        // 加载链接（带权限验证）
         async function loadLinks() {
+            const auth = localStorage.getItem('auth');
+            if (!auth) {
+                alert('请先登录');
+                return;
+            }
             const res = await fetch('/api/links', {
-                headers: { 'Authorization': `Bearer ${ACCESS_PASSWORD}` }
+                headers: { 'Authorization': `Bearer ${auth}` }
             });
+            if (res.status === 401) {
+                alert('登录已过期，请重新登录');
+                localStorage.removeItem('auth');
+                document.getElementById('loginContainer').classList.remove('hidden');
+                document.getElementById('mainContent').classList.add('hidden');
+                return;
+            }
             allLinks = await res.json();
             renderLinks(allLinks);
             renderCategories();
         }
 
+        // 渲染分类
         function renderCategories() {
             const categories = ['工作', '学习', '娱乐', '工具', '其他'];
             const tabContainer = document.getElementById('categoryTabs');
@@ -320,6 +347,7 @@
             });
         }
 
+        // 渲染链接
         function renderLinks(links) {
             const container = document.getElementById('linkContainer');
             container.innerHTML = '';
@@ -338,18 +366,21 @@
                 container.appendChild(card);
             });
 
+            // 删除链接事件
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.target.dataset.id;
+                    const auth = localStorage.getItem('auth');
                     await fetch(`/api/links/${id}`, { 
                         method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${ACCESS_PASSWORD}` }
+                        headers: { 'Authorization': `Bearer ${auth}` }
                     });
                     loadLinks();
                 });
             });
         }
 
+        // 搜索链接
         function searchLinks() {
             const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
             let filteredLinks = allLinks;
@@ -366,8 +397,14 @@
             renderLinks(filteredLinks);
         }
 
+        // 添加链接
         document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const auth = localStorage.getItem('auth');
+            if (!auth) {
+                alert('请先登录');
+                return;
+            }
             const formData = new FormData(e.target);
             const link = {
                 id: Date.now().toString(),
@@ -379,7 +416,7 @@
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${ACCESS_PASSWORD}`
+                    'Authorization': `Bearer ${auth}`
                 },
                 body: JSON.stringify(link)
             });
@@ -387,6 +424,7 @@
             loadLinks();
         });
 
+        // 全部分类点击
         document.querySelector('.category-tab[data-category="all"]').addEventListener('click', () => {
             document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
             document.querySelector('.category-tab[data-category="all"]').classList.add('active');
@@ -394,9 +432,20 @@
             renderLinks(allLinks);
         });
 
+        // 搜索框回车
         document.getElementById('searchInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') searchLinks();
         });
+
+        // 页面加载时检查登录状态
+        window.onload = () => {
+            if (localStorage.getItem('auth') === AUTH_TOKEN) {
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                loadSavedBackground();
+                loadLinks();
+            }
+        };
     </script>
 </body>
 </html>
