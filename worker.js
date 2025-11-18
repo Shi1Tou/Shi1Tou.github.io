@@ -2,45 +2,62 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const AUTH_TOKEN = 'valid_token';
+    const DEFAULT_USERNAME = 'admin'; // 默认管理员用户名（可自定义）
 
-    // 初始化默认密码
-    const initDefaultPassword = async () => {
-      const existingPwd = await env.NAV_LINKS.get('admin_password');
-      if (!existingPwd) {
-        await env.NAV_LINKS.put('admin_password', 'defaultAdmin123!');
+    // 初始化默认账户（首次运行）
+    const initDefaultAccount = async () => {
+      const existingAccount = await env.NAV_LINKS.get('admin_account');
+      if (!existingAccount) {
+        // 首次运行自动创建账户：用户名admin，密码default123
+        await env.NAV_LINKS.put('admin_account', JSON.stringify({
+          username: DEFAULT_USERNAME,
+          password: 'default123' // 默认密码
+        }));
       }
     };
-    await initDefaultPassword();
+    await initDefaultAccount();
 
 
-    // 1. 密码验证接口
+    // 1. 登录验证接口（用户名+密码）
     if (url.pathname === '/api/verify-password' && request.method === 'POST') {
-      const { password } = await request.json();
-      const adminPwd = await env.NAV_LINKS.get('admin_password');
-      return password === adminPwd
-        ? new Response('验证通过', { status: 200 })
-        : new Response('密码错误', { status: 401 });
+      const { username, password } = await request.json();
+      const account = JSON.parse(await env.NAV_LINKS.get('admin_account') || '{}');
+      
+      // 验证用户名和密码是否匹配
+      if (username === account.username && password === account.password) {
+        return new Response('验证通过', { status: 200 });
+      } else {
+        return new Response('用户名或密码错误', { status: 401 });
+      }
     }
 
 
-    // 2. 修改密码接口
+    // 2. 修改密码接口（验证用户名）
     if (url.pathname === '/api/change-password' && request.method === 'POST') {
       const authHeader = request.headers.get('Authorization');
       if (!authHeader || authHeader !== `Bearer ${AUTH_TOKEN}`) {
         return new Response('未授权', { status: 401 });
       }
       
-      const { oldPassword, newPassword } = await request.json();
-      const currentPwd = await env.NAV_LINKS.get('admin_password');
+      const { username, oldPassword, newPassword } = await request.json();
+      const account = JSON.parse(await env.NAV_LINKS.get('admin_account') || '{}');
       
-      if (oldPassword !== currentPwd) {
+      // 验证用户名和原密码
+      if (username !== account.username) {
+        return new Response('用户名错误', { status: 400 });
+      }
+      if (oldPassword !== account.password) {
         return new Response('原密码错误', { status: 400 });
       }
       if (newPassword.length < 6) {
         return new Response('新密码长度不能小于6位', { status: 400 });
       }
       
-      await env.NAV_LINKS.put('admin_password', newPassword);
+      // 更新密码（保持用户名不变）
+      await env.NAV_LINKS.put('admin_account', JSON.stringify({
+        ...account,
+        password: newPassword
+      }));
       return new Response('密码修改成功', { status: 200 });
     }
 
@@ -50,7 +67,7 @@ export default {
       const links = [];
       const iterator = env.NAV_LINKS.list();
       for await (const key of iterator) {
-        if (key.name !== 'admin_password') {
+        if (key.name !== 'admin_account') { // 排除账户信息
           const link = await env.NAV_LINKS.get(key.name, { type: 'json' });
           if (link.visibility === 'public') links.push(link);
         }
@@ -80,7 +97,7 @@ export default {
       const links = [];
       const iterator = env.NAV_LINKS.list();
       for await (const key of iterator) {
-        if (key.name !== 'admin_password') {
+        if (key.name !== 'admin_account') { // 排除账户信息
           const link = await env.NAV_LINKS.get(key.name, { type: 'json' });
           links.push(link);
         }
