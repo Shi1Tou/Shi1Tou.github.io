@@ -3,219 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个性化导航页</title>
+    <title>Wenの导航</title>
     <style>
-        /* 保留所有原有样式，新增以下样式 */
-        .import-export {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            justify-content: center;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
         }
-        .import-export button {
-            padding: 0.6rem 1.2rem;
-            background: #4f46e5;
-            color: white;
+        body {
+            background-color: #f5f5f5;
+            padding-bottom: 2rem;
+        }
+        /* 顶部导航栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .top-bar .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .top-bar .logo img {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+        }
+        .top-bar .menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .top-bar .login-btn {
+            background-color: #6c63ff;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* 搜索框 */
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto 1.5rem;
+            padding: 0 1.5rem;
+        }
+        .search-box {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+        .search-box .filter-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+        }
+        /* 分类区域 */
+        .category-section {
+            max-width: 1200px;
+            margin: 0 auto 1.5rem;
+            padding: 0 1.5rem;
+        }
+        .category-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 3px solid #6c63ff;
+        }
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .link-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .link-card .link-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+        .link-card .link-desc {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+        .link-card a {
+            text-decoration: none;
+            color: inherit;
+        }
+        /* 登录弹窗 */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            display: none;
+        }
+        .login-modal.active {
+            display: flex;
+        }
+        .login-form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 350px;
+        }
+        .login-form h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #333;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            outline: none;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #6c63ff;
+            color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
-        .import-export button:hover {
-            background: #4338ca;
+        /* 管理员功能区（导入导出） */
+        .admin-controls {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
         }
-        #fileInput {
+        .admin-controls button {
+            padding: 0.5rem 1rem;
+            background-color: #6c63ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* 添加链接表单 */
+        .add-link-form {
+            max-width: 1200px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .add-link-form h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row input, .form-row select {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.8rem;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            outline: none;
+        }
+        .form-row button {
+            padding: 0.8rem 1.5rem;
+            background-color: #6c63ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* 网络切换器 */
+        .network-switch {
+            max-width: 1200px;
+            margin: 0 auto 1rem;
+            padding: 0 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            color: #666;
+        }
+        .network-switch select {
+            padding: 0.4rem;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        /* 隐藏元素 */
+        .hidden {
             display: none;
         }
     </style>
 </head>
 <body>
-    <div class="login-container" id="loginContainer">
+    <!-- 登录弹窗 -->
+    <div class="login-modal" id="loginModal">
         <div class="login-form">
-            <h2>请输入访问密码</h2>
-            <input type="password" id="loginPassword" placeholder="密码" required>
+            <h2>管理员登录</h2>
+            <input type="password" id="loginPassword" placeholder="请输入管理员密码" required>
             <button onclick="verifyPassword()">登录</button>
         </div>
     </div>
 
-    <div class="container" id="mainContent" class="hidden">
-        <h1>我的个性化导航页</h1>
-
-        <div class="network-switch" id="networkSwitch" style="display: none;">
-            <span>网络类型：</span>
-            <select id="networkTypeSelect" onchange="switchNetworkType()">
-                <option value="auto">自动检测</option>
-                <option value="internal">内网</option>
-                <option value="external">外网</option>
-            </select>
+    <!-- 顶部导航栏 -->
+    <div class="top-bar">
+        <div class="logo">
+            <img src="https://example.com/logo.png" alt="Logo"> <!-- 替换为你的Logo链接 -->
+            <span>Wenの导航</span>
         </div>
+        <button class="menu-btn">☰</button>
+        <button class="login-btn" id="loginBtn" onclick="showLoginModal()">登录</button>
+    </div>
 
-        <!-- 新增：导入导出按钮 -->
-        <div class="import-export" id="importExportContainer" style="display: none;">
-            <button onclick="document.getElementById('fileInput').click()">导入JSON书签</button>
-            <button onclick="exportBookmarks()">导出JSON书签</button>
-            <input type="file" id="fileInput" accept=".json" onchange="importBookmarks(event)">
+    <!-- 网络切换器（管理员可见） -->
+    <div class="network-switch hidden" id="networkSwitch">
+        <span>网络类型：</span>
+        <select id="networkTypeSelect" onchange="switchNetworkType()">
+            <option value="auto">自动检测</option>
+            <option value="internal">内网</option>
+            <option value="external">外网</option>
+        </select>
+    </div>
+
+    <!-- 管理员功能区（导入导出） -->
+    <div class="admin-controls hidden" id="adminControls">
+        <button onclick="document.getElementById('fileInput').click()">导入JSON书签</button>
+        <button onclick="exportBookmarks()">导出JSON书签</button>
+        <input type="file" id="fileInput" accept=".json" onchange="importBookmarks(event)" class="hidden">
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索书签名称、URL或描述..." onkeypress="if(event.key === 'Enter') searchLinks()">
+            <button class="filter-btn">▼</button>
         </div>
+    </div>
 
-        <div class="top-controls">
-            <div class="bg-config">
-                <input type="url" id="bgImageUrl" placeholder="输入背景图片API链接（如Unsplash）">
-                <button onclick="setBackground()">设置背景</button>
-                <button onclick="resetBackground()">重置</button>
-            </div>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索链接...">
-                <button onclick="searchLinks()">搜索</button>
-            </div>
-        </div>
+    <!-- 分类区域（AI） -->
+    <div class="category-section">
+        <div class="category-title">AI</div>
+        <div class="link-grid" id="aiLinkContainer"></div>
+    </div>
 
-        <div class="category-tabs" id="categoryTabs">
-            <button class="category-tab active" data-category="all">全部</button>
-        </div>
+    <!-- 分类区域（工具类） -->
+    <div class="category-section">
+        <div class="category-title">工具类</div>
+        <div class="link-grid" id="toolLinkContainer"></div>
+    </div>
 
-        <div class="link-grid" id="linkContainer"></div>
-
-        <div class="form-container">
-            <h3>添加新链接</h3>
-            <form id="addLinkForm">
+    <!-- 添加链接表单（管理员可见） -->
+    <div class="add-link-form hidden" id="addLinkFormContainer">
+        <h3>添加新链接</h3>
+        <form id="addLinkForm">
+            <div class="form-row">
                 <input type="text" name="name" placeholder="链接名称" required>
-                <div>
-                    <input type="url" name="externalUrl" placeholder="外网链接（必填，如https://example.com）" required>
-                </div>
-                <div>
-                    <input type="text" name="internalUrl" placeholder="内网链接（可选，如http://192.168.1.100）">
-                    <div class="optional-hint">内网链接为可选</div>
-                </div>
+                <input type="url" name="externalUrl" placeholder="外网链接（必填）" required>
+                <input type="text" name="internalUrl" placeholder="内网链接（可选）">
+            </div>
+            <div class="form-row">
                 <select name="category" required>
-                    <option value="工作">工作</option>
-                    <option value="学习">学习</option>
-                    <option value="娱乐">娱乐</option>
-                    <option value="工具">工具</option>
+                    <option value="AI">AI</option>
+                    <option value="工具类">工具类</option>
                     <option value="其他">其他</option>
                 </select>
-                <select name="visibility" class="visibility-option" required>
-                    <option value="public">公开（所有人可见）</option>
+                <select name="visibility" required>
+                    <option value="public">公开</option>
                     <option value="private">仅管理员可见</option>
                 </select>
                 <button type="submit">添加</button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
     <script>
         let allLinks = [];
-        let currentCategory = 'all';
         let currentNetworkType = 'auto';
         const AUTH_TOKEN = 'valid_token';
         let isAdmin = false;
 
-        window.onload = () => {
-            const auth = localStorage.getItem('auth');
-            if (auth === AUTH_TOKEN) {
-                isAdmin = true;
-                document.getElementById('loginContainer').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                document.getElementById('networkSwitch').style.display = 'flex';
-                document.getElementById('importExportContainer').style.display = 'flex'; // 显示导入导出按钮
-                loadSavedBackground();
-                loadLinks();
-            } else {
-                isAdmin = false;
-                document.getElementById('loginContainer').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                loadSavedBackground();
-                loadPublicLinks();
-            }
-        };
-
-        // 新增：导出书签为JSON文件
-        function exportBookmarks() {
-            if (!isAdmin) return;
-            // 准备导出数据（添加导出时间）
-            const exportData = {
-                timestamp: new Date().toISOString(),
-                links: allLinks
-            };
-            const jsonString = JSON.stringify(exportData, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `bookmarks_${new Date().getTime()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        // 显示登录弹窗
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
         }
 
-        // 新增：导入JSON书签文件
-        async function importBookmarks(event) {
-            if (!isAdmin) return;
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const importData = JSON.parse(e.target.result);
-                    // 验证导入格式
-                    if (!importData.links || !Array.isArray(importData.links)) {
-                        throw new Error('JSON格式错误，缺少links数组');
-                    }
-
-                    // 批量添加书签（重复ID会被覆盖）
-                    for (const link of importData.links) {
-                        // 验证必要字段
-                        if (!link.name || !link.externalUrl || !link.category || !link.visibility) {
-                            console.warn(`跳过无效链接: ${link.name || '未知名称'}`);
-                            continue;
-                        }
-                        // 生成新ID避免冲突（或保留原ID）
-                        const linkWithId = {
-                            ...link,
-                            id: link.id || Date.now() + Math.random().toString(36).substr(2, 5)
-                        };
-                        await fetch('/api/links', {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem('auth')}`
-                            },
-                            body: JSON.stringify(linkWithId)
-                        });
-                    }
-
-                    alert(`导入成功，共处理 ${importData.links.length} 个链接`);
-                    loadLinks(); // 重新加载链接
-                    event.target.value = ''; // 重置文件输入
-                } catch (err) {
-                    alert(`导入失败: ${err.message}`);
-                }
-            };
-            reader.readAsText(file);
+        // 隐藏登录弹窗
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
         }
 
-        // 其余原有函数保持不变
-        function detectNetworkType() {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve('external');
-                }, 500);
-            });
-        }
-
-        function switchNetworkType() {
-            currentNetworkType = document.getElementById('networkTypeSelect').value;
-            if (currentNetworkType === 'auto') {
-                detectNetworkType().then(type => {
-                    currentNetworkType = type;
-                    renderLinks(allLinks);
-                });
-            } else {
-                renderLinks(allLinks);
-            }
-        }
-
+        // 管理员密码验证
         async function verifyPassword() {
             const inputPwd = document.getElementById('loginPassword').value;
             try {
@@ -227,102 +354,112 @@
                 if (res.ok) {
                     localStorage.setItem('auth', AUTH_TOKEN);
                     isAdmin = true;
-                    document.getElementById('loginContainer').classList.add('hidden');
-                    document.getElementById('networkSwitch').style.display = 'flex';
-                    document.getElementById('importExportContainer').style.display = 'flex';
+                    hideLoginModal();
+                    // 显示管理员功能
+                    document.getElementById('networkSwitch').classList.remove('hidden');
+                    document.getElementById('adminControls').classList.remove('hidden');
+                    document.getElementById('addLinkFormContainer').classList.remove('hidden');
+                    document.getElementById('loginBtn').classList.add('hidden');
                     loadLinks();
                 } else {
-                    alert('密码错误，仅管理员可查看私有链接');
+                    alert('密码错误！');
                 }
             } catch (e) {
-                alert('验证失败');
+                alert('验证失败，请重试');
             }
         }
 
-        async function loadPublicLinks() {
-            const res = await fetch('/api/links/public');
-            allLinks = await res.json();
-            renderLinks(allLinks);
-            renderCategories();
-        }
-
-        async function loadLinks() {
-            const auth = localStorage.getItem('auth');
-            if (!auth) return;
-            const res = await fetch('/api/links', {
-                headers: { 'Authorization': `Bearer ${auth}` }
+        // 自动检测网络类型
+        function detectNetworkType() {
+            return new Promise(resolve => {
+                setTimeout(() => resolve('external'), 500);
             });
-            if (res.status === 401) {
-                alert('登录已过期');
-                localStorage.removeItem('auth');
-                isAdmin = false;
-                document.getElementById('networkSwitch').style.display = 'none';
-                document.getElementById('importExportContainer').style.display = 'none';
-                loadPublicLinks();
-                return;
-            }
-            allLinks = await res.json();
+        }
+
+        // 切换网络类型
+        async function switchNetworkType() {
+            currentNetworkType = document.getElementById('networkTypeSelect').value;
             if (currentNetworkType === 'auto') {
                 currentNetworkType = await detectNetworkType();
-                document.getElementById('networkTypeSelect').value = 'auto';
             }
-            renderLinks(allLinks);
-            renderCategories();
+            renderLinks();
         }
 
-        function renderLinks(links) {
-            const container = document.getElementById('linkContainer');
-            container.innerHTML = '';
-            if (links.length === 0) {
-                container.innerHTML = '<div style="color:white; grid-column: 1/-1; text-align: center;">暂无链接</div>';
-                return;
-            }
+        // 加载链接
+        async function loadLinks() {
+            const authHeader = isAdmin ? { 'Authorization': `Bearer ${localStorage.getItem('auth')}` } : {};
+            const url = isAdmin ? '/api/links' : '/api/links/public';
+            const res = await fetch(url, { headers: authHeader });
+            allLinks = await res.json();
+            renderLinks();
+        }
 
+        // 渲染链接到对应分类
+        function renderLinks() {
             const activeNetworkType = currentNetworkType === 'auto' ? 'external' : currentNetworkType;
+            
+            // 分类筛选
+            const aiLinks = allLinks.filter(link => link.category === 'AI' && (isAdmin || link.visibility === 'public'));
+            const toolLinks = allLinks.filter(link => link.category === '工具类' && (isAdmin || link.visibility === 'public'));
 
+            // 渲染AI分类
+            renderLinkGrid('aiLinkContainer', aiLinks, activeNetworkType);
+            // 渲染工具类分类
+            renderLinkGrid('toolLinkContainer', toolLinks, activeNetworkType);
+        }
+
+        // 渲染单个分类的链接网格
+        function renderLinkGrid(containerId, links, networkType) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
             links.forEach(link => {
-                let displayUrl = link.externalUrl;
-                let networkLabel = '外网';
-                
-                if (activeNetworkType === 'internal' && link.internalUrl) {
-                    displayUrl = link.internalUrl;
-                    networkLabel = '内网';
-                }
-
+                // 选择链接地址（内网/外网）
+                const linkUrl = networkType === 'internal' && link.internalUrl ? link.internalUrl : link.externalUrl;
+                // 生成卡片
                 const card = document.createElement('div');
                 card.className = 'link-card';
                 card.innerHTML = `
-                    <span class="category-tag">${link.category}</span>
-                    <span class="visibility-tag ${link.visibility === 'public' ? 'public' : ''}">
-                        ${link.visibility === 'public' ? '公开' : '私有'}
-                    </span>
-                    <span class="network-type">${networkLabel}</span>
-                    <a href="${displayUrl}" target="_blank">${link.name}</a>
-                    ${isAdmin ? `<button class="delete-btn" data-id="${link.id}">删除</button>` : ''}
+                    <a href="${linkUrl}" target="_blank">
+                        <div class="link-name">${link.name}</div>
+                        <div class="link-desc">${link.desc || linkUrl}</div>
+                    </a>
+                    ${isAdmin ? `<button class="delete-btn" style="margin-top:0.5rem; padding:0.4rem; background:#ff4444; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="deleteLink('${link.id}')">删除</button>` : ''}
                 `;
                 container.appendChild(card);
             });
-
-            if (isAdmin) {
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const id = e.target.dataset.id;
-                        await fetch(`/api/links/${id}`, { 
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${localStorage.getItem('auth')}` }
-                        });
-                        loadLinks();
-                    });
-                });
-            }
         }
 
-        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!isAdmin) {
-                alert('请登录管理员账号添加链接');
+        // 删除链接
+        async function deleteLink(id) {
+            await fetch(`/api/links/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth')}` }
+            });
+            loadLinks();
+        }
+
+        // 搜索链接
+        function searchLinks() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!keyword) {
+                renderLinks();
                 return;
             }
+            const filteredLinks = allLinks.filter(link => 
+                link.name.toLowerCase().includes(keyword) || 
+                link.externalUrl.toLowerCase().includes(keyword) || 
+                (link.internalUrl && link.internalUrl.toLowerCase().includes(keyword))
+            );
+            // 重新分类渲染
+            const aiLinks = filteredLinks.filter(link => link.category === 'AI' && (isAdmin || link.visibility === 'public'));
+            const toolLinks = filteredLinks.filter(link => link.category === '工具类' && (isAdmin || link.visibility === 'public'));
+            renderLinkGrid('aiLinkContainer', aiLinks, currentNetworkType);
+            renderLinkGrid('toolLinkContainer', toolLinks, currentNetworkType);
+        }
+
+        // 添加链接
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             const formData = new FormData(e.target);
             const link = {
                 id: Date.now().toString(),
@@ -334,7 +471,7 @@
             };
             await fetch('/api/links', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('auth')}`
                 },
@@ -344,77 +481,62 @@
             loadLinks();
         });
 
-        function setBackground() {
-            const url = document.getElementById('bgImageUrl').value;
-            if (url) {
-                document.body.style.backgroundImage = `url(${url})`;
-                localStorage.setItem('bgImageUrl', url);
-            } else {
-                alert('请输入有效的图片链接！');
+        // 导入书签
+        async function importBookmarks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    for (const link of importData.links) {
+                        await fetch('/api/links', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('auth')}`
+                            },
+                            body: JSON.stringify({
+                                ...link,
+                                id: link.id || Date.now().toString()
+                            })
+                        });
+                    }
+                    alert(`成功导入${importData.links.length}个链接`);
+                    loadLinks();
+                } catch (err) {
+                    alert(`导入失败：${err.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 导出书签
+        function exportBookmarks() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                links: allLinks
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `wen_bookmarks_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // 页面加载初始化
+        window.onload = () => {
+            const auth = localStorage.getItem('auth');
+            if (auth === AUTH_TOKEN) {
+                isAdmin = true;
+                document.getElementById('networkSwitch').classList.remove('hidden');
+                document.getElementById('adminControls').classList.remove('hidden');
+                document.getElementById('addLinkFormContainer').classList.remove('hidden');
+                document.getElementById('loginBtn').classList.add('hidden');
             }
-        }
-
-        function resetBackground() {
-            document.body.style.backgroundImage = '';
-            localStorage.removeItem('bgImageUrl');
-            document.getElementById('bgImageUrl').value = '';
-        }
-
-        function loadSavedBackground() {
-            const savedUrl = localStorage.getItem('bgImageUrl');
-            if (savedUrl) {
-                document.body.style.backgroundImage = `url(${savedUrl})`;
-                document.getElementById('bgImageUrl').value = savedUrl;
-            }
-        }
-
-        function renderCategories() {
-            const categories = ['工作', '学习', '娱乐', '工具', '其他'];
-            const tabContainer = document.getElementById('categoryTabs');
-            tabContainer.innerHTML = '<button class="category-tab active" data-category="all">全部</button>';
-            categories.forEach(cat => {
-                const tab = document.createElement('button');
-                tab.className = 'category-tab';
-                tab.dataset.category = cat;
-                tab.textContent = cat;
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    currentCategory = cat;
-                    const filteredLinks = allLinks.filter(link => link.category === cat);
-                    renderLinks(filteredLinks);
-                });
-                tabContainer.appendChild(tab);
-            });
-        }
-
-        function searchLinks() {
-            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-            let filteredLinks = allLinks;
-            if (currentCategory !== 'all') {
-                filteredLinks = filteredLinks.filter(link => link.category === currentCategory);
-            }
-            if (keyword) {
-                filteredLinks = filteredLinks.filter(link => 
-                    link.name.toLowerCase().includes(keyword) || 
-                    link.externalUrl.toLowerCase().includes(keyword) ||
-                    (link.internalUrl && link.internalUrl.toLowerCase().includes(keyword)) ||
-                    link.category.toLowerCase().includes(keyword)
-                );
-            }
-            renderLinks(filteredLinks);
-        }
-
-        document.querySelector('.category-tab[data-category="all"]').addEventListener('click', () => {
-            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('.category-tab[data-category="all"]').classList.add('active');
-            currentCategory = 'all';
-            renderLinks(allLinks);
-        });
-
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchLinks();
-        });
+            loadLinks();
+        };
     </script>
 </body>
 </html>
