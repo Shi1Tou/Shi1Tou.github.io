@@ -156,6 +156,7 @@
             padding: 0.5rem 1rem;
             border-radius: 4px;
             cursor: pointer;
+            margin-right: 0.5rem;
         }
 
         /* 网络切换器 */
@@ -368,33 +369,35 @@
     </div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- 登录弹窗 -->
+    <!-- 登录弹窗（含用户名输入） -->
     <div class="login-modal" id="loginModal">
         <div class="login-form">
             <h2>管理员登录</h2>
-            <input type="password" id="loginPassword" placeholder="请输入管理员密码" required>
+            <input type="text" id="loginUsername" placeholder="请输入用户名" required>
+            <input type="password" id="loginPassword" placeholder="请输入密码" required>
             <button onclick="verifyPassword()">登录</button>
         </div>
     </div>
 
-    <!-- 修改密码弹窗 -->
+    <!-- 修改密码弹窗（含用户名验证） -->
     <div class="login-modal" id="changePwdModal">
         <div class="login-form">
             <h2>修改管理员密码</h2>
+            <input type="text" id="changeUsername" placeholder="用户名" required>
             <input type="password" id="oldPwd" placeholder="原密码" required>
             <input type="password" id="newPwd" placeholder="新密码（至少6位）" required>
             <button onclick="changeAdminPassword()">确认修改</button>
         </div>
     </div>
 
-    <!-- 顶部导航栏 -->
+    <!-- 顶部导航栏（登录按钮在三条杠左侧） -->
     <div class="top-bar">
         <div class="logo">
             <img src="https://example.com/logo.png" alt="Logo"> <!-- 替换为你的Logo -->
             <span>Wenの导航</span>
         </div>
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <button class="login-btn" id="loginBtn" onclick="showLoginModal()">登录</button>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     </div>
 
     <!-- 网络切换器（管理员可见） -->
@@ -423,7 +426,7 @@
         </div>
     </div>
 
-    <!-- 链接显示区域（动态生成） -->
+    <!-- 链接显示区域 -->
     <div class="category-section" id="currentCategorySection">
         <div class="category-title" id="currentCategoryTitle">全部书签</div>
         <div class="link-grid" id="currentLinkGrid"></div>
@@ -480,17 +483,25 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // 管理员密码验证
+        // 管理员登录验证（用户名+密码）
         async function verifyPassword() {
-            const inputPwd = document.getElementById('loginPassword').value;
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                alert('请输入用户名和密码');
+                return;
+            }
+
             try {
                 const res = await fetch('/api/verify-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: inputPwd })
+                    body: JSON.stringify({ username, password })
                 });
                 if (res.ok) {
                     localStorage.setItem('auth', AUTH_TOKEN);
+                    localStorage.setItem('adminUsername', username);
                     isAdmin = true;
                     hideModal('loginModal');
                     // 显示管理员功能
@@ -500,20 +511,21 @@
                     document.getElementById('loginBtn').classList.add('hidden');
                     loadLinks();
                 } else {
-                    alert('密码错误！');
+                    alert('用户名或密码错误！');
                 }
             } catch (e) {
                 alert('验证失败，请重试');
             }
         }
 
-        // 修改管理员密码
+        // 修改管理员密码（验证用户名）
         async function changeAdminPassword() {
+            const username = document.getElementById('changeUsername').value.trim();
             const oldPwd = document.getElementById('oldPwd').value;
             const newPwd = document.getElementById('newPwd').value;
             
-            if (!oldPwd || !newPwd || newPwd.length < 6) {
-                alert('请填写有效的原密码和新密码（至少6位）');
+            if (!username || !oldPwd || !newPwd || newPwd.length < 6) {
+                alert('请填写完整信息，新密码至少6位');
                 return;
             }
 
@@ -524,7 +536,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('auth')}`
                     },
-                    body: JSON.stringify({ oldPassword: oldPwd, newPassword: newPwd })
+                    body: JSON.stringify({ username, oldPassword: oldPwd, newPassword: newPwd })
                 });
                 
                 if (res.ok) {
@@ -568,7 +580,7 @@
 
         // 渲染分类侧边栏
         function renderCategorySidebar() {
-            // 分类结构（含子分类）
+            // 分类结构
             const categoryStructure = {
                 "全部书签": [],
                 "AI": [],
