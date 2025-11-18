@@ -1,7 +1,7 @@
-name = "nav-page"
+name = "wen-nav"
 main = "worker.js"
 compatibility_date = "2024-05-01"
 
 [kv_namespaces]
-binding = "NAV_LINKS"  # KV绑定名称，需与代码中一致
-id = "e9ad016302e9444487cbddbf802ccfa5"  # 部署时替换为你的KV命名空间ID（通过wrangler kv:namespace create NAV_LINKS获取）
+binding = "NAV_LINKS"
+id = ""  # 替换为你的KV命名空间ID

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wenの导航</title>
     <style>
+        /* 全局样式 */
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +15,109 @@
         body {
             background-color: #f5f5f5;
             padding-bottom: 2rem;
+            position: relative;
+            overflow-x: hidden;
         }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            color: #333;
+        }
+        .sidebar-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .category-list {
+            list-style: none;
+        }
+        .category-item {
+            margin-bottom: 0.5rem;
+        }
+        .category-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .category-link:hover {
+            background-color: #f5f5f5;
+        }
+        .category-link.active {
+            background-color: #6c63ff;
+            color: #fff;
+        }
+        .category-count {
+            background-color: #eee;
+            color: #666;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .category-link.active .category-count {
+            background-color: #fff;
+            color: #6c63ff;
+        }
+        .category-expand {
+            background: none;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .subcategory-list {
+            list-style: none;
+            padding-left: 1.5rem;
+            display: none;
+        }
+        .subcategory-list.active {
+            display: block;
+        }
+
         /* 顶部导航栏 */
         .top-bar {
             display: flex;
@@ -24,6 +127,8 @@
             background-color: #fff;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 100;
         }
         .top-bar .logo {
             display: flex;
@@ -52,6 +157,41 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        /* 网络切换器 */
+        .network-switch {
+            max-width: 1200px;
+            margin: 0 auto 1rem;
+            padding: 0 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            color: #666;
+        }
+        .network-switch select {
+            padding: 0.4rem;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        /* 管理员功能区 */
+        .admin-controls {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .admin-controls button {
+            padding: 0.5rem 1rem;
+            background-color: #6c63ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
         /* 搜索框 */
         .search-container {
             max-width: 1200px;
@@ -81,6 +221,7 @@
             cursor: pointer;
             color: #999;
         }
+
         /* 分类区域 */
         .category-section {
             max-width: 1200px;
@@ -125,7 +266,8 @@
             text-decoration: none;
             color: inherit;
         }
-        /* 登录弹窗 */
+
+        /* 登录/修改密码弹窗 */
         .login-modal {
             position: fixed;
             top: 0;
@@ -136,7 +278,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 1001;
             display: none;
         }
         .login-modal.active {
@@ -171,23 +313,7 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        /* 管理员功能区（导入导出） */
-        .admin-controls {
-            max-width: 1200px;
-            margin: 1rem auto;
-            padding: 0 1.5rem;
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-        .admin-controls button {
-            padding: 0.5rem 1rem;
-            background-color: #6c63ff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+
         /* 添加链接表单 */
         .add-link-form {
             max-width: 1200px;
@@ -224,21 +350,7 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        /* 网络切换器 */
-        .network-switch {
-            max-width: 1200px;
-            margin: 0 auto 1rem;
-            padding: 0 1.5rem;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            color: #666;
-        }
-        .network-switch select {
-            padding: 0.4rem;
-            border: 1px solid #eee;
-            border-radius: 4px;
-        }
+
         /* 隐藏元素 */
         .hidden {
             display: none;
@@ -246,6 +358,16 @@
     </style>
 </head>
 <body>
+    <!-- 分类侧边栏 -->
+    <div class="sidebar" id="categorySidebar">
+        <div class="sidebar-header">
+            <h2>分类</h2>
+            <button class="sidebar-close" onclick="toggleSidebar()">×</button>
+        </div>
+        <ul class="category-list" id="categoryList"></ul>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- 登录弹窗 -->
     <div class="login-modal" id="loginModal">
         <div class="login-form">
@@ -255,13 +377,23 @@
         </div>
     </div>
 
+    <!-- 修改密码弹窗 -->
+    <div class="login-modal" id="changePwdModal">
+        <div class="login-form">
+            <h2>修改管理员密码</h2>
+            <input type="password" id="oldPwd" placeholder="原密码" required>
+            <input type="password" id="newPwd" placeholder="新密码（至少6位）" required>
+            <button onclick="changeAdminPassword()">确认修改</button>
+        </div>
+    </div>
+
     <!-- 顶部导航栏 -->
     <div class="top-bar">
         <div class="logo">
-            <img src="https://example.com/logo.png" alt="Logo"> <!-- 替换为你的Logo链接 -->
+            <img src="https://example.com/logo.png" alt="Logo"> <!-- 替换为你的Logo -->
             <span>Wenの导航</span>
         </div>
-        <button class="menu-btn">☰</button>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <button class="login-btn" id="loginBtn" onclick="showLoginModal()">登录</button>
     </div>
 
@@ -275,10 +407,11 @@
         </select>
     </div>
 
-    <!-- 管理员功能区（导入导出） -->
+    <!-- 管理员功能区 -->
     <div class="admin-controls hidden" id="adminControls">
         <button onclick="document.getElementById('fileInput').click()">导入JSON书签</button>
         <button onclick="exportBookmarks()">导出JSON书签</button>
+        <button onclick="document.getElementById('changePwdModal').classList.add('active')">修改密码</button>
         <input type="file" id="fileInput" accept=".json" onchange="importBookmarks(event)" class="hidden">
     </div>
 
@@ -290,16 +423,10 @@
         </div>
     </div>
 
-    <!-- 分类区域（AI） -->
-    <div class="category-section">
-        <div class="category-title">AI</div>
-        <div class="link-grid" id="aiLinkContainer"></div>
-    </div>
-
-    <!-- 分类区域（工具类） -->
-    <div class="category-section">
-        <div class="category-title">工具类</div>
-        <div class="link-grid" id="toolLinkContainer"></div>
+    <!-- 链接显示区域（动态生成） -->
+    <div class="category-section" id="currentCategorySection">
+        <div class="category-title" id="currentCategoryTitle">全部书签</div>
+        <div class="link-grid" id="currentLinkGrid"></div>
     </div>
 
     <!-- 添加链接表单（管理员可见） -->
@@ -315,7 +442,10 @@
                 <select name="category" required>
                     <option value="AI">AI</option>
                     <option value="工具类">工具类</option>
-                    <option value="其他">其他</option>
+                    <option value="云服/NAS">云服/NAS</option>
+                    <option value="大佬/论坛">大佬/论坛</option>
+                    <option value="网盘">网盘</option>
+                    <option value="机械类">机械类</option>
                 </select>
                 <select name="visibility" required>
                     <option value="public">公开</option>
@@ -332,14 +462,22 @@
         const AUTH_TOKEN = 'valid_token';
         let isAdmin = false;
 
+        // 侧边栏控制
+        function toggleSidebar() {
+            const sidebar = document.getElementById('categorySidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
         // 显示登录弹窗
         function showLoginModal() {
             document.getElementById('loginModal').classList.add('active');
         }
 
-        // 隐藏登录弹窗
-        function hideLoginModal() {
-            document.getElementById('loginModal').classList.remove('active');
+        // 隐藏弹窗
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
 
         // 管理员密码验证
@@ -354,7 +492,7 @@
                 if (res.ok) {
                     localStorage.setItem('auth', AUTH_TOKEN);
                     isAdmin = true;
-                    hideLoginModal();
+                    hideModal('loginModal');
                     // 显示管理员功能
                     document.getElementById('networkSwitch').classList.remove('hidden');
                     document.getElementById('adminControls').classList.remove('hidden');
@@ -367,6 +505,39 @@
             } catch (e) {
                 alert('验证失败，请重试');
             }
+        }
+
+        // 修改管理员密码
+        async function changeAdminPassword() {
+            const oldPwd = document.getElementById('oldPwd').value;
+            const newPwd = document.getElementById('newPwd').value;
+            
+            if (!oldPwd || !newPwd || newPwd.length < 6) {
+                alert('请填写有效的原密码和新密码（至少6位）');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth')}`
+                    },
+                    body: JSON.stringify({ oldPassword: oldPwd, newPassword: newPwd })
+                });
+                
+                if (res.ok) {
+                    alert('密码修改成功，请重新登录');
+                    localStorage.removeItem('auth');
+                    location.reload();
+                } else {
+                    alert(await res.text());
+                }
+            } catch (e) {
+                alert('修改失败，请重试');
+            }
+            hideModal('changePwdModal');
         }
 
         // 自动检测网络类型
@@ -382,7 +553,7 @@
             if (currentNetworkType === 'auto') {
                 currentNetworkType = await detectNetworkType();
             }
-            renderLinks();
+            renderCurrentLinks();
         }
 
         // 加载链接
@@ -391,42 +562,100 @@
             const url = isAdmin ? '/api/links' : '/api/links/public';
             const res = await fetch(url, { headers: authHeader });
             allLinks = await res.json();
-            renderLinks();
+            renderCategorySidebar();
+            renderCurrentLinks('全部书签');
         }
 
-        // 渲染链接到对应分类
-        function renderLinks() {
-            const activeNetworkType = currentNetworkType === 'auto' ? 'external' : currentNetworkType;
-            
-            // 分类筛选
-            const aiLinks = allLinks.filter(link => link.category === 'AI' && (isAdmin || link.visibility === 'public'));
-            const toolLinks = allLinks.filter(link => link.category === '工具类' && (isAdmin || link.visibility === 'public'));
+        // 渲染分类侧边栏
+        function renderCategorySidebar() {
+            // 分类结构（含子分类）
+            const categoryStructure = {
+                "全部书签": [],
+                "AI": [],
+                "工具类": [],
+                "云服/NAS": [],
+                "大佬/论坛": [],
+                "网盘": [],
+                "机械类": []
+            };
 
-            // 渲染AI分类
-            renderLinkGrid('aiLinkContainer', aiLinks, activeNetworkType);
-            // 渲染工具类分类
-            renderLinkGrid('toolLinkContainer', toolLinks, activeNetworkType);
+            // 统计分类数量
+            const categoryCounts = {};
+            allLinks.forEach(link => {
+                const category = link.category;
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            categoryCounts["全部书签"] = allLinks.length;
+
+            // 生成分类列表
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+
+            Object.keys(categoryStructure).forEach(category => {
+                const count = categoryCounts[category] || 0;
+                const listItem = document.createElement('li');
+                listItem.className = 'category-item';
+                listItem.innerHTML = `
+                    <div class="category-link ${category === '全部书签' ? 'active' : ''}" onclick="switchCategory('${category}')">
+                        <span>${category}</span>
+                        <span class="category-count">${count}</span>
+                    </div>
+                `;
+                categoryList.appendChild(listItem);
+            });
         }
 
-        // 渲染单个分类的链接网格
-        function renderLinkGrid(containerId, links, networkType) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            links.forEach(link => {
-                // 选择链接地址（内网/外网）
-                const linkUrl = networkType === 'internal' && link.internalUrl ? link.internalUrl : link.externalUrl;
-                // 生成卡片
+        // 切换分类
+        function switchCategory(category) {
+            // 标记活跃分类
+            document.querySelectorAll('.category-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // 渲染对应分类的链接
+            renderCurrentLinks(category);
+
+            // 移动端自动关闭侧边栏
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        // 渲染当前分类的链接
+        function renderCurrentLinks(category = '全部书签') {
+            // 更新分类标题
+            document.getElementById('currentCategoryTitle').textContent = category;
+            const linkGrid = document.getElementById('currentLinkGrid');
+            linkGrid.innerHTML = '';
+
+            // 过滤链接
+            let filteredLinks;
+            if (category === '全部书签') {
+                filteredLinks = allLinks;
+            } else {
+                filteredLinks = allLinks.filter(link => link.category === category && (isAdmin || link.visibility === 'public'));
+            }
+
+            // 渲染链接卡片
+            filteredLinks.forEach(link => {
+                const linkUrl = currentNetworkType === 'internal' && link.internalUrl ? link.internalUrl : link.externalUrl;
                 const card = document.createElement('div');
                 card.className = 'link-card';
                 card.innerHTML = `
                     <a href="${linkUrl}" target="_blank">
                         <div class="link-name">${link.name}</div>
-                        <div class="link-desc">${link.desc || linkUrl}</div>
+                        <div class="link-desc">${link.internalUrl ? `${link.externalUrl} / ${link.internalUrl}` : link.externalUrl}</div>
                     </a>
                     ${isAdmin ? `<button class="delete-btn" style="margin-top:0.5rem; padding:0.4rem; background:#ff4444; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="deleteLink('${link.id}')">删除</button>` : ''}
                 `;
-                container.appendChild(card);
+                linkGrid.appendChild(card);
             });
+
+            // 空状态
+            if (filteredLinks.length === 0) {
+                linkGrid.innerHTML = '<div style="color:#999; grid-column: 1/-1; text-align: center; padding: 2rem;">暂无链接</div>';
+            }
         }
 
         // 删除链接
@@ -442,19 +671,32 @@
         function searchLinks() {
             const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
             if (!keyword) {
-                renderLinks();
+                renderCurrentLinks(document.getElementById('currentCategoryTitle').textContent);
                 return;
             }
+
             const filteredLinks = allLinks.filter(link => 
                 link.name.toLowerCase().includes(keyword) || 
                 link.externalUrl.toLowerCase().includes(keyword) || 
                 (link.internalUrl && link.internalUrl.toLowerCase().includes(keyword))
             );
-            // 重新分类渲染
-            const aiLinks = filteredLinks.filter(link => link.category === 'AI' && (isAdmin || link.visibility === 'public'));
-            const toolLinks = filteredLinks.filter(link => link.category === '工具类' && (isAdmin || link.visibility === 'public'));
-            renderLinkGrid('aiLinkContainer', aiLinks, currentNetworkType);
-            renderLinkGrid('toolLinkContainer', toolLinks, currentNetworkType);
+
+            // 渲染搜索结果
+            const linkGrid = document.getElementById('currentLinkGrid');
+            linkGrid.innerHTML = '';
+            filteredLinks.forEach(link => {
+                const linkUrl = currentNetworkType === 'internal' && link.internalUrl ? link.internalUrl : link.externalUrl;
+                const card = document.createElement('div');
+                card.className = 'link-card';
+                card.innerHTML = `
+                    <a href="${linkUrl}" target="_blank">
+                        <div class="link-name">${link.name}</div>
+                        <div class="link-desc">${link.externalUrl}</div>
+                    </a>
+                    ${isAdmin ? `<button class="delete-btn" onclick="deleteLink('${link.id}')">删除</button>` : ''}
+                `;
+                linkGrid.appendChild(card);
+            });
         }
 
         // 添加链接
@@ -525,7 +767,7 @@
             URL.revokeObjectURL(a.href);
         }
 
-        // 页面加载初始化
+        // 页面初始化
         window.onload = () => {
             const auth = localStorage.getItem('auth');
             if (auth === AUTH_TOKEN) {
