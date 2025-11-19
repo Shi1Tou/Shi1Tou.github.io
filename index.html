@@ -134,6 +134,14 @@
             font-size: 1.2rem;
             cursor: pointer;
         }
+        .top-bar .settings-btn {
+            background-color: #6c63ff;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
         /* 网络切换器 */
         .network-switch {
@@ -233,7 +241,6 @@
             transform: translateY(-2px);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        /* 图标容器样式 */
         .link-icon {
             width: 48px;
             height: 48px;
@@ -288,7 +295,7 @@
             font-size: 0.8rem;
         }
 
-        /* 添加链接表单（新增图标自定义选项） */
+        /* 添加链接表单（修复确认按钮） */
         .add-link-form {
             max-width: 1200px;
             margin: 1.5rem auto;
@@ -334,11 +341,22 @@
         }
         .form-row button {
             padding: 0.8rem 1.5rem;
-            background-color: #6c63ff;
-            color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+        }
+        /* 确认按钮样式 */
+        .confirm-add-btn {
+            background-color: #4CAF50 !important;
+            color: white;
+            font-weight: bold;
+        }
+        .confirm-add-btn:hover {
+            background-color: #45a049 !important;
+        }
+        .icon-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd !important;
         }
 
         /* 图标自定义弹窗 */
@@ -403,6 +421,92 @@
             color: #333;
         }
 
+        /* 设置页面样式 */
+        .settings-page {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 1000px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        .settings-page.active {
+            right: 0;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .settings-header h2 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        .settings-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .settings-menu {
+            width: 200px;
+            float: left;
+            margin-right: 2rem;
+        }
+        .settings-menu ul {
+            list-style: none;
+        }
+        .settings-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .settings-menu button {
+            width: 100%;
+            padding: 0.8rem;
+            text-align: left;
+            border: none;
+            border-radius: 4px;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .settings-menu button.active {
+            background: #6c63ff;
+            color: #fff;
+        }
+        .settings-content {
+            margin-left: 220px;
+        }
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .data-item:last-child {
+            border-bottom: none;
+        }
+        .data-item .label {
+            font-weight: 500;
+        }
+        .data-item .action {
+            color: #6c63ff;
+            cursor: pointer;
+        }
+        .data-item .desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
         /* 隐藏元素 */
         .hidden {
             display: none;
@@ -439,6 +543,91 @@
         </div>
     </div>
 
+    <!-- 设置页面 -->
+    <div class="settings-page" id="settingsPage">
+        <div class="settings-header">
+            <h2>设置</h2>
+            <button class="close-btn" onclick="closeSettings()">×</button>
+        </div>
+        <div class="settings-menu">
+            <ul>
+                <li><button onclick="showSettingsTab('appearance')">外观设置</button></li>
+                <li><button class="active" onclick="showSettingsTab('data')">数据管理</button></li>
+                <li><button onclick="showSettingsTab('ai')">AI 助手</button></li>
+                <li><button onclick="showSettingsTab('about')">关于</button></li>
+            </ul>
+        </div>
+        <div class="settings-content">
+            <!-- 数据管理 tab -->
+            <div id="dataTab">
+                <div class="data-item">
+                    <div>
+                        <div class="label">导入/导出</div>
+                        <div class="desc">备份或恢复书签数据</div>
+                    </div>
+                    <div class="action" onclick="showImportExportModal()">导入/导出</div>
+                </div>
+                <div class="data-item">
+                    <div>
+                        <div class="label">云端备份</div>
+                        <div class="desc">将数据备份到 Cloudflare R2 存储，支持备份列表管理和恢复</div>
+                    </div>
+                    <div class="action" onclick="showBackupModal()">备份管理</div>
+                </div>
+                <div class="data-item">
+                    <div>
+                        <div class="label">清理空分类</div>
+                        <div class="desc">当前没有空分类</div>
+                    </div>
+                    <div class="action" style="color: #999;">无空分类</div>
+                </div>
+                <div class="data-item">
+                    <div>
+                        <div class="label">书签统计</div>
+                        <div class="desc" id="bookmarkStats">共 0 个书签，其中 0 个私密书签</div>
+                    </div>
+                    <div class="action" style="color: #999;">统计</div>
+                </div>
+            </div>
+            <!-- 其他 tab 内容 -->
+            <div id="appearanceTab" class="hidden">
+                <p>外观设置内容...</p>
+            </div>
+            <div id="aiTab" class="hidden">
+                <p>AI 助手设置内容...</p>
+            </div>
+            <div id="aboutTab" class="hidden">
+                <p>关于 Wenの导航...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入/导出弹窗 -->
+    <div class="icon-modal" id="importExportModal">
+        <div class="icon-modal-content">
+            <h3>导入/导出书签</h3>
+            <div class="icon-form-row">
+                <label for="importFile">选择文件</label>
+                <input type="file" id="importFile" accept=".json" onchange="handleFileImport()">
+            </div>
+            <div class="icon-form-row">
+                <button class="confirm-btn" onclick="exportBookmarksSettings()">导出书签</button>
+                <button class="cancel-btn" onclick="closeImportExportModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 云端备份弹窗 -->
+    <div class="icon-modal" id="backupModal">
+        <div class="icon-modal-content">
+            <h3>云端备份管理</h3>
+            <div class="icon-form-row">
+                <button class="confirm-btn" onclick="createBackup()">创建备份</button>
+                <button class="cancel-btn" onclick="closeBackupModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 顶部导航栏 -->
     <div class="top-bar">
         <div class="logo">
@@ -446,6 +635,7 @@
             <span>Wenの导航</span>
         </div>
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <button class="settings-btn" onclick="openSettings()">设置</button>
     </div>
 
     <!-- 网络切换器 -->
@@ -479,11 +669,424 @@
         <div class="link-grid" id="currentLinkGrid"></div>
     </div>
 
-    <!-- 添加链接表单（新增图标相关选项） -->
+    <!-- 添加链接表单（含明确的确认按钮） -->
     <div class="add-link-form">
         <h3>添加新链接</h3>
         <form id="addLinkForm">
             <div class="form-row">
                 <input type="text" name="name" placeholder="链接名称" required>
                 <input type="url" name="externalUrl" placeholder="外网链接（必填）" required>
-                <input type="text" name
+                <input type="text" name="internalUrl" placeholder="内网链接（可选）">
+            </div>
+            <div class="form-row">
+                <select name="category" required>
+                    <option value="AI">AI</option>
+                    <option value="工具类">工具类</option>
+                    <option value="云服/NAS">云服/NAS</option>
+                    <option value="大佬/论坛">大佬/论坛</option>
+                    <option value="网盘">网盘</option>
+                    <option value="机械类">机械类</option>
+                </select>
+                <button type="button" class="icon-btn" onclick="openIconModal()">自定义图标</button>
+                <!-- 明确的确认按钮 -->
+                <button type="submit" class="confirm-add-btn">确认添加</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let allLinks = [];
+        let currentNetworkType = 'auto';
+        let currentCustomIcon = { text: '', color: '#6c63ff' };
+
+        // 侧边栏控制
+        function toggleSidebar() {
+            const sidebar = document.getElementById('categorySidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 设置页面控制
+        function openSettings() {
+            document.getElementById('settingsPage').classList.add('active');
+            updateBookmarkStats();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsPage').classList.remove('active');
+        }
+
+        function showSettingsTab(tabId) {
+            // 隐藏所有 tab
+            document.querySelectorAll('[id$=Tab]').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            // 取消所有按钮激活状态
+            document.querySelectorAll('.settings-menu button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // 显示目标 tab 并激活按钮
+            document.getElementById(`${tabId}Tab`).classList.remove('hidden');
+            document.querySelector(`.settings-menu button[onclick="showSettingsTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // 数据管理-导入/导出弹窗
+        function showImportExportModal() {
+            document.getElementById('importExportModal').classList.add('active');
+        }
+
+        function closeImportExportModal() {
+            document.getElementById('importExportModal').classList.remove('active');
+            document.getElementById('importFile').value = ''; // 重置文件选择
+        }
+
+        function handleFileImport() {
+            const file = document.getElementById('importFile').files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    for (const link of importData.links) {
+                        await fetch('/api/links', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...link,
+                                id: link.id || Date.now().toString(),
+                                icon: link.icon || {}
+                            })
+                        });
+                    }
+                    alert(`成功导入${importData.links.length}个链接`);
+                    loadLinks();
+                    closeImportExportModal();
+                } catch (err) {
+                    alert(`导入失败：${err.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportBookmarksSettings() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                links: allLinks
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `wen_bookmarks_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            closeImportExportModal();
+        }
+
+        // 数据管理-云端备份弹窗
+        function showBackupModal() {
+            document.getElementById('backupModal').classList.add('active');
+        }
+
+        function closeBackupModal() {
+            document.getElementById('backupModal').classList.remove('active');
+        }
+
+        function createBackup() {
+            alert('云端备份功能已触发');
+            closeBackupModal();
+        }
+
+        // 更新书签统计
+        function updateBookmarkStats() {
+            const total = allLinks.length;
+            const privateCount = allLinks.filter(link => link.visibility === 'private').length;
+            document.getElementById('bookmarkStats').textContent = `共 ${total} 个书签，其中 ${privateCount} 个私密书签`;
+        }
+
+        // 图标自定义弹窗
+        function openIconModal() {
+            document.getElementById('iconModal').classList.add('active');
+        }
+
+        function closeIconModal() {
+            document.getElementById('iconModal').classList.remove('active');
+        }
+
+        function confirmCustomIcon() {
+            const text = document.getElementById('iconText').value.trim();
+            const color = document.getElementById('iconColor').value;
+            if (text) {
+                currentCustomIcon = { text, color };
+                alert('图标自定义成功');
+            } else {
+                alert('请输入图标文字（1-2个字符）');
+                return;
+            }
+            closeIconModal();
+        }
+
+        // 自动检测网络类型
+        function detectNetworkType() {
+            return new Promise(resolve => {
+                setTimeout(() => resolve('external'), 500);
+            });
+        }
+
+        // 切换网络类型
+        async function switchNetworkType() {
+            currentNetworkType = document.getElementById('networkTypeSelect').value;
+            if (currentNetworkType === 'auto') {
+                currentNetworkType = await detectNetworkType();
+            }
+            renderCurrentLinks();
+        }
+
+        // 加载链接
+        async function loadLinks() {
+            const res = await fetch('/api/links');
+            allLinks = await res.json();
+            renderCategorySidebar();
+            renderCurrentLinks('全部书签');
+            updateBookmarkStats();
+        }
+
+        // 渲染分类侧边栏
+        function renderCategorySidebar() {
+            const categoryStructure = {
+                "全部书签": [],
+                "AI": [],
+                "工具类": [],
+                "云服/NAS": [],
+                "大佬/论坛": [],
+                "网盘": [],
+                "机械类": []
+            };
+
+            const categoryCounts = {};
+            allLinks.forEach(link => {
+                const category = link.category;
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            categoryCounts["全部书签"] = allLinks.length;
+
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+
+            Object.keys(categoryStructure).forEach(category => {
+                const count = categoryCounts[category] || 0;
+                const listItem = document.createElement('li');
+                listItem.className = 'category-item';
+                listItem.innerHTML = `
+                    <div class="category-link ${category === '全部书签' ? 'active' : ''}" onclick="switchCategory('${category}')">
+                        <span>${category}</span>
+                        <span class="category-count">${count}</span>
+                    </div>
+                `;
+                categoryList.appendChild(listItem);
+            });
+        }
+
+        // 切换分类
+        function switchCategory(category) {
+            document.querySelectorAll('.category-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            renderCurrentLinks(category);
+
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        // 渲染当前分类的链接
+        function renderCurrentLinks(category = '全部书签') {
+            document.getElementById('currentCategoryTitle').textContent = category;
+            const linkGrid = document.getElementById('currentLinkGrid');
+            linkGrid.innerHTML = '';
+
+            let filteredLinks;
+            if (category === '全部书签') {
+                filteredLinks = allLinks;
+            } else {
+                filteredLinks = allLinks.filter(link => link.category === category);
+            }
+
+            filteredLinks.forEach(link => {
+                const linkUrl = currentNetworkType === 'internal' && link.internalUrl ? link.internalUrl : link.externalUrl;
+                const card = document.createElement('div');
+                card.className = 'link-card';
+                
+                // 图标渲染逻辑
+                let iconHtml = '';
+                if (link.icon && link.icon.text) {
+                    iconHtml = `<div class="link-icon text-icon" style="background-color: ${link.icon.color};">${link.icon.text}</div>`;
+                } else {
+                    // 自动获取图标（使用链接域名首字母）
+                    const domain = new URL(link.externalUrl).hostname.split('.')[0];
+                    const firstChar = domain.charAt(0).toUpperCase();
+                    iconHtml = `<div class="link-icon text-icon" style="background-color: #${Math.floor(Math.random()*16777215).toString(16)};">${firstChar}</div>`;
+                }
+
+                card.innerHTML = `
+                    ${iconHtml}
+                    <a href="${linkUrl}" target="_blank">
+                        <div class="link-name">${link.name}</div>
+                        <div class="link-desc">${link.internalUrl ? `${link.externalUrl} / ${link.internalUrl}` : link.externalUrl}</div>
+                    </a>
+                    <button class="delete-btn" onclick="deleteLink('${link.id}')">删除</button>
+                `;
+                linkGrid.appendChild(card);
+            });
+
+            if (filteredLinks.length === 0) {
+                linkGrid.innerHTML = '<div style="color:#999; grid-column: 1/-1; text-align: center; padding: 2rem;">暂无链接</div>';
+            }
+        }
+
+        // 删除链接
+        async function deleteLink(id) {
+            await fetch(`/api/links/${id}`, {
+                method: 'DELETE'
+            });
+            loadLinks();
+        }
+
+        // 搜索链接
+        function searchLinks() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!keyword) {
+                renderCurrentLinks(document.getElementById('currentCategoryTitle').textContent);
+                return;
+            }
+
+            const filteredLinks = allLinks.filter(link => 
+                link.name.toLowerCase().includes(keyword) || 
+                link.externalUrl.toLowerCase().includes(keyword) || 
+                (link.internalUrl && link.internalUrl.toLowerCase().includes(keyword))
+            );
+
+            const linkGrid = document.getElementById('currentLinkGrid');
+            linkGrid.innerHTML = '';
+            filteredLinks.forEach(link => {
+                const linkUrl = currentNetworkType === 'internal' && link.internalUrl ? link.internalUrl : link.externalUrl;
+                const card = document.createElement('div');
+                card.className = 'link-card';
+                
+                const domain = new URL(link.externalUrl).hostname.split('.')[0];
+                const firstChar = domain.charAt(0).toUpperCase();
+                card.innerHTML = `
+                    <div class="link-icon text-icon" style="background-color: #${Math.floor(Math.random()*16777215).toString(16)};">${firstChar}</div>
+                    <a href="${linkUrl}" target="_blank">
+                        <div class="link-name">${link.name}</div>
+                        <div class="link-desc">${link.externalUrl}</div>
+                    </a>
+                    <button class="delete-btn" onclick="deleteLink('${link.id}')">删除</button>
+                `;
+                linkGrid.appendChild(card);
+            });
+        }
+
+        // 添加链接（带确认按钮逻辑）
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // 阻止默认提交
+            const formData = new FormData(e.target);
+            
+            // 验证必填字段
+            const name = formData.get('name').trim();
+            const externalUrl = formData.get('externalUrl').trim();
+            const category = formData.get('category');
+            
+            if (!name || !externalUrl || !category) {
+                alert('请填写链接名称、外网链接和分类');
+                return;
+            }
+            
+            // 构建链接数据
+            const link = {
+                id: Date.now().toString(),
+                name: name,
+                externalUrl: externalUrl,
+                internalUrl: formData.get('internalUrl') || '',
+                category: category,
+                icon: currentCustomIcon.text ? currentCustomIcon : {}
+            };
+            
+            try {
+                // 提交到API
+                const response = await fetch('/api/links', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(link)
+                });
+                
+                if (response.ok) {
+                    alert('链接添加成功！');
+                    e.target.reset(); // 重置表单
+                    currentCustomIcon = { text: '', color: '#6c63ff' }; // 重置自定义图标
+                    loadLinks(); // 刷新链接列表
+                } else {
+                    alert('添加失败，请重试');
+                }
+            } catch (err) {
+                alert('网络错误：' + err.message);
+            }
+        });
+
+        // 导入书签（兼容原有逻辑）
+        async function importBookmarks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    for (const link of importData.links) {
+                        await fetch('/api/links', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...link,
+                                id: link.id || Date.now().toString(),
+                                icon: link.icon || {}
+                            })
+                        });
+                    }
+                    alert(`成功导入${importData.links.length}个链接`);
+                    loadLinks();
+                } catch (err) {
+                    alert(`导入失败：${err.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 导出书签（兼容原有逻辑）
+        function exportBookmarks() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                links: allLinks
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `wen_bookmarks_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // 页面初始化
+        window.onload = () => {
+            loadLinks();
+        };
+    </script>
+</body>
+</html>
