@@ -4,4 +4,4 @@ compatibility_date = "2024-05-01"
 
 [kv_namespaces]
 binding = "NAV_LINKS"
-id = "e9ad016302e9444487cbddbf802ccfa5"  # 替换为你的KV命名空间ID
+id = "56a09b5b3d9f4376b491254228ceefc6"  # 替换为你的KV命名空间ID
