@@ -8,10 +8,10 @@ export default {
     const initDefaultAccount = async () => {
       const existingAccount = await env.NAV_LINKS.get('admin_account');
       if (!existingAccount) {
-        // 首次运行自动创建账户：用户名admin，密码default123
+        // 首次运行自动创建账户：用户名admin，密码123456
         await env.NAV_LINKS.put('admin_account', JSON.stringify({
           username: DEFAULT_USERNAME,
-          password: 'default123' // 默认密码
+          password: '123456' // 默认密码
         }));
       }
     };
